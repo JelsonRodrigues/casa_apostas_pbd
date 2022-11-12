@@ -17,12 +17,14 @@ VALUES
 (7, 'Tiao', 'da Silva', '1999-12-25', 'Alameda central, 1001 - Brasilia', '11 981362594', 'root', 'tiaoinvencoes1999@yahoo.com', '35261523501', 1),
 (8, 'Pedro', 'Tavares de Melo', '1993-04-11', 'Apple Park, 105', '555 333156', 'root', 'joaocavalin83@outlook.com', '35692619905', 0);
 
+
 INSERT INTO GERENCIA (ID_USUARIO_ADMINISTRADOR, ID_CASA_APOSTA)
 VALUES
 (3, 1),
 (2, 2),
 (7, 3),
 (7, 4);
+
 
 INSERT INTO CLIENTES (ID_CASA_APOSTA, ID_USUARIO_APOSTADOR, SALDO)
 VALUES
@@ -34,18 +36,16 @@ VALUES
 (2, 6, 58355.22),
 (4, 5, -150.15);
 
---- usuarios apostadores: 1, 5, 6, 8,
---- usuarios administradores: 2, 3, 4, 7
 
-INSERT INTO BILHETE (DATA, STATUS, ID_USUARIO_APOSTADOR) 
+INSERT INTO BILHETE (ID_BILHETE, DATA, STATUS, ID_USUARIO_APOSTADOR) 
 VALUES
-('15-02-2022', 1, 5),
-('15-02-2022', 1, 1),
-('15-02-2022', 1, 6),
-('15-02-2022', 1, 8),
-('03-03-2022', 0, 8),
-('19-01-2022', 0, 1),
-('01-03-2022', 0, 5);
+(1, '15-02-2022', 1, 5),
+(2, '15-02-2022', 1, 1),
+(3, '15-02-2022', 1, 6),
+(4, '15-02-2022', 1, 8),
+(5, '03-03-2022', 0, 8),
+(6, '19-01-2022', 0, 1),
+(7, '01-03-2022', 0, 5);
 
 
 INSERT INTO JOGO (ID_JOGO, TIME_CASA, TIME_FORA, DATA_INICIO, DATA_FIM) 
@@ -87,6 +87,7 @@ VALUES
 (6, 0, 9),
 (7, 1, 13);
 
+
 INSERT INTO NUMERO_GOLS (ID_APOSTA, TIPO, NUMERO)
 VALUES 
 (2, 1, 1);
@@ -95,7 +96,12 @@ VALUES
 INSERT INTO BILHETE_TEM_APOSTA (ID_BILHETE, ID_APOSTA, ODD, VALOR_APOSTADO, STATUS, RESULTADO)
 VALUES
 (1, 1, 12.0, 300.0, 0, 0),
-(2, 2, 5.6, 350.0, 0, 0),
-(3, 2, 5.6, 350.0, 0, 0),
-(4, 2, 5.6, 350.0, 0, 0),
-(5, 2, 5.6, 350.0, 0, 0);
+(2, 2, 5.6, 130.0, 1, 1),
+(3, 2, 5.6, 600.0, 1, 0),
+(4, 2, 5.6, 255.0, 1, 1),
+(5, 2, 5.6, 15.0, 1, 0),
+(6, 3, 2.3, 300.0, 0, 0),
+(7, 5, 4.9, 130.0, 1, 1),
+(3, 3, 2.5, 600.0, 1, 0),
+(4, 4, 5.0, 255.0, 1, 1),
+(2, 4, 5.0, 151.0, 1, 0);

@@ -1,5 +1,3 @@
-CREATE SCHEMA CASA_APOSTAS;
-
 CREATE TABLE CASA_DE_APOSTA (
     ID_CASA_APOSTA  SMALLSERIAL PRIMARY KEY,
     NOME            VARCHAR(20) NOT NULL,
@@ -81,7 +79,7 @@ CREATE TABLE RESULTADO (
 
 CREATE TABLE APOSTA (
     ID_APOSTA               SERIAL PRIMARY KEY,
-    ODD                     DECIMAL (3,2),
+    ODD                     DECIMAL (4,2) NOT NULL,
     TIPO                    SMALLINT NOT NULL,
     ID_JOGO                 SMALLINT NOT NULL,
     ID_CASA_APOSTA          SMALLINT NOT NULL,
@@ -122,7 +120,7 @@ CREATE TABLE NUMERO_GOLS (
 CREATE TABLE BILHETE_TEM_APOSTA (
     ID_BILHETE              SMALLINT,
     ID_APOSTA               SMALLINT,
-    ODD                     DECIMAL (3,2) NOT NULL,
+    ODD                     DECIMAL (4,2) NOT NULL,
     VALOR_APOSTADO          DECIMAL (10,2) NOT NULL,
     STATUS                  SMALLINT NOT NULL DEFAULT 0,
     RESULTADO               SMALLINT,

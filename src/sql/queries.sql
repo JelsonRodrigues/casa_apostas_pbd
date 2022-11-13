@@ -26,7 +26,7 @@ JOIN casa_de_aposta ON clientes.id_casa_aposta = casa_de_aposta.id_casa_aposta
 JOIN usuario ON clientes.id_usuario_apostador = usuario.id_usuario
 WHERE usuario.nome = 'Pedro' AND usuario.sobrenome = 'Tavares de Melo';
 
--- Buscar o nome e a data de criação de todas as casas de aposta gerenciadas por 
+-- Buscar o nome e a data de criação de todas as casas de aposta gerenciadas por Tiao da Silva
 SELECT casa_de_aposta.nome, casa_de_aposta.data_criacao
 FROM gerencia
 JOIN casa_de_aposta ON gerencia.id_casa_aposta = casa_de_aposta.id_casa_aposta

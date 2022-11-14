@@ -1,9 +1,9 @@
-INSERT INTO CASA_DE_APOSTA (NOME, CNPJ, DATA_CRIACAO, ENDERECO, TELEFONE)
+INSERT INTO CASA_DE_APOSTA (ID_CASA_APOSTA, NOME, CNPJ, DATA_CRIACAO, ENDERECO, TELEFONE)
 VALUES 
-('Apostas do Ze', '00.111.222/3333-44', '2011-01-16', 'Beco da esquina, 01 - Pelotas', '32529999'),
-('BetFair', '11.111.111/1111-11', '2001-05-09', 'Avenida Brasil, 150 - Sao Paulo', '5181529999'),
-('Perca Conosco', '22.333.444/5555-00', '2021-06-09', 'Marechal Deodoro, 303 - Porto Alegre', '56888565499'),
-('Seu azar, nossa aleg', '66.666.444/6666-00', '1969-04-29', 'Alameda central, 1001 - Brasilia', '51984452631');
+(1, 'Apostas do Ze', '00.111.222/3333-44', '2011-01-16', 'Beco da esquina, 01 - Pelotas', '32529999'),
+(2, 'BetFair', '11.111.111/1111-11', '2001-05-09', 'Avenida Brasil, 150 - Sao Paulo', '5181529999'),
+(3, 'Perca Conosco', '22.333.444/5555-00', '2021-06-09', 'Marechal Deodoro, 303 - Porto Alegre', '56888565499'),
+(4, 'Seu azar, nossa aleg', '66.666.444/6666-00', '1969-04-29', 'Alameda central, 1001 - Brasilia', '51984452631');
 
 
 INSERT INTO USUARIO (ID_USUARIO, NOME, SOBRENOME, DATA_NASCIMENTO, ENDERECO, TELEFONE, SENHA, EMAIL, CPF, TIPO)
@@ -95,13 +95,13 @@ VALUES
 
 INSERT INTO BILHETE_TEM_APOSTA (ID_BILHETE, ID_APOSTA, ODD, VALOR_APOSTADO, STATUS, RESULTADO)
 VALUES
-(1, 1, 12.0, 300.0, 0, 0),
+(1, 1, 12.0, 300.0, 0, NULL),
 (2, 2, 5.6, 130.0, 1, 1),
 (3, 2, 5.6, 600.0, 1, 0),
-(4, 2, 5.6, 255.0, 1, 1),
-(5, 2, 5.6, 15.0, 1, 0),
-(6, 3, 2.3, 300.0, 0, 0),
-(7, 5, 4.9, 130.0, 1, 1),
+(4, 2, 5.6, 255.0, 1, 0),
+(5, 2, 5.6, 15.0, 1, 1),
+(6, 3, 2.3, 300.0, 0, NULL),
+(7, 5, 4.9, 130.0, 1, 0),
 (3, 3, 2.5, 600.0, 1, 0),
 (4, 4, 5.0, 255.0, 1, 1),
-(2, 4, 5.0, 151.0, 1, 0);
+(2, 4, 5.0, 151.0, 1, 1);

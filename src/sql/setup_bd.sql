@@ -17,7 +17,9 @@ CREATE TABLE USUARIO (
     SENHA           VARCHAR(88) NOT NULL,
     EMAIL           VARCHAR(50) NOT NULL,
     CPF             VARCHAR(11) UNIQUE NOT NULL,
-    TIPO            SMALLINT NOT NULL
+    TIPO            SMALLINT NOT NULL,
+
+    CONSTRAINT check_usuario_tipo CHECK (TIPO IN (0, 1))
 );
 
 CREATE TABLE GERENCIA (
@@ -53,6 +55,7 @@ CREATE TABLE BILHETE (
     STATUS                  SMALLINT NOT NULL DEFAULT 0,
     ID_USUARIO_APOSTADOR    SMALLINT NOT NULL,
 
+    CONSTRAINT check_bilhete_status CHECK (STATUS IN (0, 1, 2)),
     CONSTRAINT fk_bilhete_usuario FOREIGN KEY (ID_USUARIO_APOSTADOR) REFERENCES USUARIO (ID_USUARIO)
         ON DELETE CASCADE
         ON UPDATE CASCADE
@@ -63,7 +66,10 @@ CREATE TABLE JOGO (
     TIME_CASA               VARCHAR(30) NOT NULL,
     TIME_FORA               VARCHAR(30) NOT NULL,
     DATA_INICIO             TIMESTAMP NOT NULL,
-    DATA_FIM                TIMESTAMP NOT NULL
+    DATA_FIM                TIMESTAMP NOT NULL,
+
+    CONSTRAINT check_jogo_datas CHECK (DATA_INICIO <= DATA_FIM),
+    CONSTRAINT check_jogo_times CHECK (TIME_CASA != TIME_FORA)
 );
 
 CREATE TABLE RESULTADO (
@@ -72,6 +78,9 @@ CREATE TABLE RESULTADO (
     GOLS_TIME_FORA          SMALLINT NOT NULL,
     TOTAL_ESCANTEIOS        SMALLINT NOT NULL,
 
+    CONSTRAINT check_resultado_gols_time_casa CHECK (GOLS_TIME_CASA >= 0),
+    CONSTRAINT check_resultado_gols_time_fora CHECK (GOLS_TIME_FORA >= 0),
+    CONSTRAINT check_resultado_total_escanteios CHECK (TOTAL_ESCANTEIOS >= 0),
     CONSTRAINT fk_resultado_jogo FOREIGN KEY (ID_JOGO) REFERENCES JOGO (ID_JOGO)
         ON DELETE CASCADE
         ON UPDATE CASCADE
@@ -84,6 +93,7 @@ CREATE TABLE APOSTA (
     ID_JOGO                 SMALLINT NOT NULL,
     ID_CASA_APOSTA          SMALLINT NOT NULL,
 
+    CONSTRAINT check_aposta_tipo CHECK (TIPO IN (0, 1, 2)),
     CONSTRAINT fk_aposta_jogo FOREIGN KEY (ID_JOGO) REFERENCES JOGO (ID_JOGO)
         ON DELETE CASCADE
         ON UPDATE CASCADE,
@@ -96,6 +106,7 @@ CREATE TABLE RESULTADO_FINAL (
     ID_APOSTA               SMALLINT PRIMARY KEY,
     RESULTADO_FINAL         CHAR(4) NOT NULL,
     
+    CONSTRAINT check_resultado_final_resultado_final CHECK (RESULTADO_FINAL IN ('CASA', 'FORA')),
     CONSTRAINT fk_resultado_final_aposta FOREIGN KEY (ID_APOSTA) REFERENCES APOSTA(ID_APOSTA)
         ON DELETE CASCADE
         ON UPDATE CASCADE
@@ -106,6 +117,8 @@ CREATE TABLE NUMERO_ESCANTEIOS (
     TIPO                    SMALLINT NOT NULL,
     NUMERO                  SMALLINT NOT NULL,
 
+    CONSTRAINT check_numero_escanteios_tipo CHECK (TIPO IN (0, 1, 2)),
+    CONSTRAINT check_numero_escanteios_numero CHECK (NUMERO >= 0),
     CONSTRAINT fk_numero_escanteios_aposta FOREIGN KEY (ID_APOSTA) REFERENCES APOSTA (ID_APOSTA)
         ON DELETE CASCADE
         ON UPDATE CASCADE
@@ -113,9 +126,11 @@ CREATE TABLE NUMERO_ESCANTEIOS (
 
 CREATE TABLE NUMERO_GOLS (
     ID_APOSTA               SMALLINT PRIMARY KEY,
-    TIPO                    SMALLINT NOT NULL,
-    NUMERO                  SMALLINT NOT NULL,
+    TIPO                    SMALLINT NOT NULL ,
+    NUMERO                  SMALLINT NOT NULL ,
 
+    CONSTRAINT check_numero_gols_tipo CHECK (TIPO IN (0, 1, 2)),
+    CONSTRAINT check_numero_gols_numero CHECK (NUMERO >= 0),
     CONSTRAINT fk_numero_gols_aposta FOREIGN KEY (ID_APOSTA) REFERENCES APOSTA (ID_APOSTA)
         ON DELETE CASCADE
         ON UPDATE CASCADE
@@ -127,8 +142,11 @@ CREATE TABLE BILHETE_TEM_APOSTA (
     ODD                     DECIMAL (4,2) NOT NULL,
     VALOR_APOSTADO          DECIMAL (10,2) NOT NULL,
     STATUS                  SMALLINT NOT NULL DEFAULT 0,
-    RESULTADO               SMALLINT,
+    RESULTADO               SMALLINT DEFAULT NULL,
 
+    CONSTRAINT check_bilhete_tem_aposta_resultado CHECK ((STATUS = 1 AND (RESULTADO IN (0, 1))) OR (STATUS != 1 AND RESULTADO IS NULL)),
+    CONSTRAINT check_bilhete_tem_aposta_valor_apostado CHECK (VALOR_APOSTADO > 0.0),
+    CONSTRAINT check_bilhete_tem_aposta_status  CHECK (STATUS >= 0 AND STATUS <= 2),
     CONSTRAINT pk_bilhete_tem_aposta PRIMARY KEY (ID_BILHETE, ID_APOSTA),
     CONSTRAINT fk_bilhete_tem_aposta_bilhete FOREIGN KEY (ID_BILHETE) REFERENCES BILHETE (ID_BILHETE)
         ON DELETE CASCADE

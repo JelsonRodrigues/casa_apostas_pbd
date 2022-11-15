@@ -36,9 +36,101 @@ app.post("/add/result", async (req, res) => {
         console.log(req.body);
         const result = req.body;
         const newResult = await pool.query(
-            "INSERT INTO RESULTADO (ID_JOGO, GOLS_TIME_CASA, GOLS_TIME_FORA, TOTAL_ESCANTEIOS) VALUES ($1, $2, $3, $4)"
-            [result.id_jogo, result.gols_time_fora, result.gols_time_casa, result.total_escanteios]
+            "INSERT INTO RESULTADO (ID_JOGO, GOLS_TIME_CASA, GOLS_TIME_FORA, TOTAL_ESCANTEIOS) VALUES ($1, $2, $3, $4)",
+            [result.id_jogo, result.gols_time_casa, result.gols_time_fora, result.total_escanteios]
         );
+        
+        // Passar esta parte diretamente para o banco de dados
+        const betsInGame = await pool.query(
+            `SELECT 
+            CLIENTES.ID_USUARIO_APOSTADOR AS ID_USUARIO,
+            CLIENTES.SALDO AS SALDO,
+            APOSTA.ID_CASA_APOSTA,
+            APOSTA.ID_APOSTA AS ID_APOSTA, 
+            APOSTA.ODD, 
+            APOSTA.TIPO AS TIPO_APOSTA, 
+            APOSTA.ID_JOGO, 
+            BILHETE_TEM_APOSTA.VALOR_APOSTADO, 
+            RESULTADO_FINAL.RESULTADO_FINAL AS RESULTADO_FINAL, 
+            NUMERO_ESCANTEIOS.TIPO AS TIPO_NUMERO_ESCANTEIOS, 
+            NUMERO_ESCANTEIOS.NUMERO AS NUMERO_ESCANTEIOS, 
+            NUMERO_GOLS.TIPO AS TIPO_NUMERO_GOLS, 
+            NUMERO_GOLS.NUMERO AS NUMERO_GOLS
+            FROM APOSTA 
+            JOIN BILHETE_TEM_APOSTA ON APOSTA.ID_APOSTA = BILHETE_TEM_APOSTA.ID_APOSTA AND BILHETE_TEM_APOSTA.STATUS = 0
+            LEFT JOIN RESULTADO_FINAL ON RESULTADO_FINAL.ID_APOSTA = APOSTA.ID_APOSTA AND APOSTA.TIPO = 0
+            LEFT JOIN NUMERO_ESCANTEIOS ON NUMERO_ESCANTEIOS.ID_APOSTA = APOSTA.ID_APOSTA AND APOSTA.TIPO = 1
+            LEFT JOIN NUMERO_GOLS ON NUMERO_GOLS.ID_APOSTA = APOSTA.ID_APOSTA AND APOSTA.TIPO = 2
+            JOIN BILHETE ON BILHETE_TEM_APOSTA.ID_BILHETE = BILHETE.ID_BILHETE
+            JOIN CLIENTES ON BILHETE.ID_USUARIO_APOSTADOR = CLIENTES.ID_USUARIO_APOSTADOR AND APOSTA.ID_CASA_APOSTA = CLIENTES.ID_CASA_APOSTA
+            WHERE APOSTA.ID_JOGO = ($1) AND BILHETE_TEM_APOSTA.STATUS = 0`,
+            [result.id_jogo]
+        );
+        
+        let winner = "";
+        if (result.gols_time_casa > result.gols_time_fora) {
+            winner = "CASA";
+        }
+        else if (result.gols_time_casa < result.gols_time_fora) {
+            winner = "FORA";
+        }
+
+        const total_gols = result.gols_time_casa + result.gols_time_fora; 
+
+        for (let index = 0; index < betsInGame.rows.length; index++) {
+            const element = betsInGame.rows[index];
+            let flagResultOfBet = false;
+            switch (element.tipo_aposta) {
+                case 0:
+                    if (element.resultado_final == winner) { flagResultOfBet = true;}
+                    break;
+                case 1:
+                    switch (element.tipo_numero_escanteios) {
+                        case 0:
+                            if (element.numero_escanteios == result.numero_escanteios){flagResultOfBet = true;}    
+                            break;
+                        case 1:
+                            if (element.numero_escanteios > result.numero_escanteios){flagResultOfBet = true;}    
+                            break;
+                        case 2:
+                            if (element.numero_escanteios < result.numero_escanteios){flagResultOfBet = true;}    
+                            break;
+                    }
+                    break;
+                case 2:
+                    switch (element.tipo_numero_gols) {
+                        case 0:
+                            if (element.numero_gols == total_gols){flagResultOfBet = true;}    
+                            break;
+                        case 1:
+                            if (element.numero_gols > total_gols){flagResultOfBet = true;}    
+                            break;
+                        case 2:
+                            if (element.numero_gols < total_gols){flagResultOfBet = true;}    
+                            break;
+                    }
+                    break;
+            }
+            
+            if (flagResultOfBet) {
+                await pool.query(
+                    "UPDATE BILHETE_TEM_APOSTA SET STATUS = 1, RESULTADO = 1 WHERE BILHETE_TEM_APOSTA.ID_APOSTA = ($1)",
+                    [element.id_aposta]
+                );
+                // Also add the money to the user account
+                await pool.query(
+                    "UPDATE CLIENTES SET SALDO = ($1) WHERE CLIENTES.ID_USUARIO_APOSTADOR = ($2) AND CLIENTES.ID_CASA_APOSTA = ($3)",
+                    [(parseFloat(element.saldo) + parseFloat(element.odd * element.valor_apostado)), element.id_usuario, element.id_casa_aposta]
+                );
+            }
+            else {
+                await pool.query(
+                    "UPDATE BILHETE_TEM_APOSTA SET STATUS = 1, RESULTADO = 0 WHERE BILHETE_TEM_APOSTA.ID_APOSTA = ($1)",
+                    [element.id_aposta]
+                );
+            }
+        }
+
         res.json(newResult);
     } catch (error) {
         console.error("ERROR: " + error.message);

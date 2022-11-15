@@ -156,3 +156,25 @@ CREATE TABLE BILHETE_TEM_APOSTA (
         ON UPDATE CASCADE
 );
 
+
+-- Quando adicionar o resultado de um jogo:
+-- (um resultado só pode ser adicionado após o final do jogo)
+-- atualizar na tabela bilhete_tem_aposta o status para concluída, 
+-- o resultado será calculado, verificando na aposta, o tipo e na tabela do 
+-- tipo de aposta, verificar qual a escolha do usuário
+-- se escolheu por resultado final e o valor escolhido ganhou, então o resultado será 1, senão 0
+-- se escolheu por número exato de gols, então verificar se o número escolhido foi o que deu no jogo, etc.
+-- caso tenha ganhado, então adicionar no saldo da pessoa o valor_apostado * odd 
+-- depois de atualizar o resultado, na tabela bilhete, verificar o bilhete que contém a aposta, e se todas as apostas do 
+-- bilhete tiverem terminado, então altera o status do bilhete para concluído
+
+-- Ao fazer uma aposta:
+-- verificar se já não existe resultado para o jogo, se existir resultado, não deixar apostar
+-- se a data final do jogo já estiver passado não permitir também
+-- Caso seja possível apostar, subtrair o valor que será apostado da conta da pessoa, caso ela não possua dinheiro 
+-- não permitir a aposta, depois de subtraído, criar um bilhete que conterá esta aposta, criar uma entrada na tabela 
+-- bilhete_tem_aposta com o id deste bilhete criado e o id da aposta, também com a odd que estava a aposta
+-- criar uma entrada em uma das tabelas resultado_final, ou numero_escanteios, ou numero_gols (de acordo com o campo tipo da aposta)
+-- e inserir os valores necessários
+
+-- 

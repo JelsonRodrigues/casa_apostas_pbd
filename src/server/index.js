@@ -74,6 +74,9 @@ app.post("/add/result", async (req, res) => {
         else if (result.gols_time_casa < result.gols_time_fora) {
             winner = "FORA";
         }
+        else {
+            winner = "EMPATE";
+        }
 
         const total_gols = result.gols_time_casa + result.gols_time_fora; 
 
@@ -137,16 +140,106 @@ app.post("/add/result", async (req, res) => {
     }
 });
 
-// Adicionar uma aposta
-app.post("/add/bet", async (req, res) => {
+// Adicionar uma aposta para resultado final
+app.post("/add/bet/resultado", async (req, res) => {
     try {
         console.log(req.body);
         const bet = req.body;
-        const newBet = await pool.query(
-            "INSERT INTO APOSTA (ODD, TIPO, ID_JOGO, ID_CASA_APOSTA) VALUES ($1, $2, $3, $4)"
-            [bet.odd, bet.tipo, bet.id_jogo, bet.id_casa_aposta]
+        
+        // verifica se já existe uma aposta nesta casa, neste jogo e com este resultado final
+        const alreadyExists = await pool.query(
+            `SELECT * 
+            FROM APOSTA
+            JOIN RESULTADO_FINAL ON RESULTADO_FINAL.ID_APOSTA = APOSTA.ID_APOSTA AND APOSTA.TIPO = 0
+            WHERE  APOSTA.ID_JOGO = ($1) AND RESULTADO_FINAL.RESULTADO_FINAL = ($2) AND APOSTA.ID_CASA_APOSTA = ($3)`,
+            [bet.id_jogo, bet.resultado_final, bet.id_casa_aposta]
         );
-        res.json(newBet);
+        if (alreadyExists.rowCount == 0) {
+            const newBet = await pool.query(
+                "INSERT INTO APOSTA (ODD, TIPO, ID_JOGO, ID_CASA_APOSTA) VALUES ($1, $2, $3, $4) RETURNING ID_APOSTA",
+                [bet.odd, 0, bet.id_jogo, bet.id_casa_aposta]
+            );
+            await pool.query(
+                "INSERT INTO RESULTADO_FINAL (ID_APOSTA, RESULTADO_FINAL) VALUES ($1, $2)",
+                [newBet.rows[0].id_aposta, bet.resultado_final]
+            );
+            res.json(newBet);
+        }
+        else {
+            res.json({
+                "error": "Bet with those parameters already exists in this house, maybe try changing the odd"
+            });
+        }
+    } catch (error) {
+        console.error("ERROR: " + error.message);
+    }
+});
+
+// Adicionar uma aposta para numero de escanteios
+app.post("/add/bet/escanteios", async (req, res) => {
+    try {
+        console.log(req.body);
+        const bet = req.body;
+
+        // verifica se já existe uma aposta nesta casa, neste jogo e com o tipo escolhido e com o este número de escanteios
+        const alreadyExists = await pool.query(
+            `SELECT * 
+            FROM APOSTA
+            JOIN NUMERO_ESCANTEIOS ON NUMERO_ESCANTEIOS.ID_APOSTA = APOSTA.ID_APOSTA AND APOSTA.TIPO = 1
+            WHERE APOSTA.ID_JOGO = ($1) AND NUMERO_ESCANTEIOS.TIPO = ($2) AND NUMERO_ESCANTEIOS.NUMERO = ($3) AND APOSTA.ID_CASA_APOSTA = ($4)`,
+            [bet.id_jogo, bet.tipo, bet.numero, bet.id_casa_aposta]
+        );
+        if (alreadyExists.rowCount == 0) {
+            const newBet = await pool.query(
+                "INSERT INTO APOSTA (ODD, TIPO, ID_JOGO, ID_CASA_APOSTA) VALUES ($1, $2, $3, $4) RETURNING ID_APOSTA",
+                [bet.odd, 1, bet.id_jogo, bet.id_casa_aposta]
+            );
+            await pool.query(
+                "INSERT INTO NUMERO_ESCANTEIOS (ID_APOSTA, TIPO, NUMERO) VALUES ($1, $2, $3)",
+                [newBet.rows[0].id_aposta, bet.tipo, bet.numero]
+            );
+            res.json(newBet);
+        }
+        else {
+            res.json({
+                "error": "Bet with those parameters already exists in this house, maybe try changing the odd"
+            });
+        }
+    } catch (error) {
+        console.error("ERROR: " + error.message);
+    }
+});
+
+// Adicionar uma aposta para numero de gols
+app.post("/add/bet/gols", async (req, res) => {
+    try {
+        console.log(req.body);
+        const bet = req.body;
+
+        // verifica se já existe uma aposta nesta casa, neste jogo e com o tipo escolhido e com o este número de gols
+        const alreadyExists = await pool.query(
+            `SELECT * 
+            FROM APOSTA
+            JOIN NUMERO_GOLS ON NUMERO_GOLS.ID_APOSTA = APOSTA.ID_APOSTA AND APOSTA.TIPO = 2
+            WHERE APOSTA.ID_JOGO = ($1) AND NUMERO_GOLS.TIPO = ($2) AND NUMERO_GOLS.NUMERO = ($3) AND APOSTA.ID_CASA_APOSTA = ($4)`,
+            [bet.id_jogo, bet.tipo, bet.numero, bet.id_casa_aposta]
+        );
+        if (alreadyExists.rowCount == 0) {
+            const newBet = await pool.query(
+                "INSERT INTO APOSTA (ODD, TIPO, ID_JOGO, ID_CASA_APOSTA) VALUES ($1, $2, $3, $4) RETURNING ID_APOSTA",
+                [bet.odd, 2, bet.id_jogo, bet.id_casa_aposta]
+            );
+            await pool.query(
+                "INSERT INTO NUMERO_GOLS (ID_APOSTA, TIPO, NUMERO) VALUES ($1, $2, $3)",
+                [newBet.rows[0].id_aposta, bet.tipo, bet.numero]
+            );
+            res.json(newBet);
+        }
+        else {
+            res.json({
+                "error": "Bet with those parameters already exists in this house, maybe try changing the odd"
+            });
+        }
     } catch (error) {
         console.error("ERROR: " + error.message);
     }
@@ -214,8 +307,7 @@ app.get("/get/bet/open/:house_id/:user_id/escanteio", async (req, res) => {
             JOIN BILHETE_TEM_APOSTA ON BILHETE.ID_BILHETE = BILHETE_TEM_APOSTA.ID_BILHETE AND BILHETE_TEM_APOSTA.STATUS = 0 AND BILHETE.ID_USUARIO_APOSTADOR = $2
             JOIN APOSTA ON BILHETE_TEM_APOSTA.ID_APOSTA = APOSTA.ID_APOSTA AND APOSTA.ID_CASA_APOSTA = $1
             JOIN JOGO ON JOGO.ID_JOGO = APOSTA.ID_JOGO
-            JOIN NUMERO_ESCANTEIOS ON NUMERO_ESCANTEIOS.ID_APOSTA = APOSTA.ID_APOSTA
-            `,
+            JOIN NUMERO_ESCANTEIOS ON NUMERO_ESCANTEIOS.ID_APOSTA = APOSTA.ID_APOSTA`,
             [params.house_id, params.user_id]
         );
         res.json(bets.rows);
@@ -246,7 +338,7 @@ app.get("/get/bet/open/:house_id/:user_id/gols", async (req, res) => {
 });
 
 // Ver as apostas em aberto do tipo resultado final
-app.get("/get/bet/open/:house_id/:user_id/gols", async (req, res) => {
+app.get("/get/bet/open/:house_id/:user_id/resultado", async (req, res) => {
     try {
         console.log(req.params);
         const params = req.params;
@@ -328,7 +420,7 @@ app.get("/get/bet/history/:house_id/:user_id/gols", async (req, res) => {
 });
 
 // Ver as apostas encerradas do tipo resultado final
-app.get("/get/bet/history/:house_id/:user_id/gols", async (req, res) => {
+app.get("/get/bet/history/:house_id/:user_id/resultado", async (req, res) => {
     try {
         console.log(req.params);
         const params = req.params;

@@ -141,7 +141,7 @@ app.post("/add/result", async (req, res) => {
 });
 
 // Adicionar uma aposta para resultado final
-app.post("/add/bet/resultado", async (req, res) => {
+app.post("/create/bet/resultado", async (req, res) => {
     try {
         console.log(req.body);
         const bet = req.body;
@@ -176,7 +176,7 @@ app.post("/add/bet/resultado", async (req, res) => {
 });
 
 // Adicionar uma aposta para numero de escanteios
-app.post("/add/bet/escanteios", async (req, res) => {
+app.post("/create/bet/escanteios", async (req, res) => {
     try {
         console.log(req.body);
         const bet = req.body;
@@ -211,7 +211,7 @@ app.post("/add/bet/escanteios", async (req, res) => {
 });
 
 // Adicionar uma aposta para numero de gols
-app.post("/add/bet/gols", async (req, res) => {
+app.post("/create/bet/gols", async (req, res) => {
     try {
         console.log(req.body);
         const bet = req.body;
@@ -440,64 +440,111 @@ app.get("/get/bet/history/:house_id/:user_id/resultado", async (req, res) => {
     }
 });
 
-// Realizar aposta no resultado final
-app.post("/add/bet/resultado", async (req, res) => {
+// Realizar aposta
+app.post("/add/bet", async (req, res) => {
     try {
         console.log(req.body);
         const bet = req.body;
-        const bets = await pool.query(
-            `INSERT INTO RESULTADO_FINAL (ID_APOSTA, RESULTADO_FINAL)
-            VALUES
-            ($1, $2)
-            `,
-            [bet.id_aposta, bet.resultado_final]
+    
+        // create a new ticket
+        const ticket = await pool.query(
+            "INSERT INTO BILHETE (DATA, ID_USUARIO_APOSTADOR) VALUES (now()::timestamp, ($1)) RETURNING ID_BILHETE",
+            [bet.id_usuario]
         );
-        res.json(bets.rows);
+        let totalValue = 0;
+
+        for (let index = 0; index < bet.bets.length; index++) {
+            const element = bet.bets[index];
+
+            const currentOdd = await pool.query(
+                "SELECT ODD FROM APOSTA WHERE APOSTA.ID_APOSTA = ($1)",
+                [element.id_aposta]
+            );
+            
+            await pool.query(
+                "INSERT INTO BILHETE_TEM_APOSTA (ID_BILHETE, ID_APOSTA, ODD, VALOR_APOSTADO) VALUES ($1, $2, $3, $4)",
+                [ticket.rows[0].id_bilhete, element.id_aposta, currentOdd.rows[0].odd, element.valor]
+            );
+            totalValue += parseFloat(element.valor);
+        }
+        
+        const houseBet = await pool.query(
+            "SELECT ID_CASA_APOSTA FROM APOSTA WHERE APOSTA.ID_APOSTA = ($1)",
+            [bet.bets[0].id_aposta]
+        );
+        
+        console.log(houseBet);
+
+        const currentMoney = await pool.query(
+            "SELECT SALDO FROM CLIENTES WHERE ID_CASA_APOSTA = ($1) AND ID_USUARIO_APOSTADOR = ($2)",
+            [houseBet.rows[0].id_casa_aposta, bet.id_usuario]
+        );
+        console.log(currentMoney);
+        await pool.query(
+            "UPDATE CLIENTES SET SALDO = ($1) WHERE ID_CASA_APOSTA = ($2) AND ID_USUARIO_APOSTADOR = ($3)",
+            [currentMoney.rows[0].saldo - totalValue, houseBet.rows[0].id_casa_aposta, bet.id_usuario]
+        );
+
+        res.json(ticket);
     } catch (error) {
         console.error("ERROR: " + error.message);
     }
 });
 
-// Realizar aposta no número de escanteios
-app.post("/add/bet/escanteios", async (req, res) => {
+// Pegar o saldo de um usuário
+app.get("/money/:house_id/:user_id",  async (req, res) => {
     try {
-        console.log(req.body);
-        const bet = req.body;
-        const bets = await pool.query(
-            `INSERT INTO NUMERO_ESCANTEIOS (ID_APOSTA, TIPO, NUMERO)
-            VALUES
-            ($1, $2, $3)
-            `,
-            [bet.id_aposta, bet.tipo, bet.numero]
+        console.log(req.params);
+        const params = req.params;
+        const money = await pool.query(
+            "SELECT SALDO FROM CLIENTES WHERE CLIENTES.ID_USUARIO_APOSTADOR = ($1) AND CLIENTES.ID_CASA_APOSTA = ($2)",
+            [params.user_id, params.house_id]
         );
-        res.json(bets.rows);
+        res.json(money.rows[0]);
     } catch (error) {
         console.error("ERROR: " + error.message);
     }
 });
-
-// Realizar aposta no número de gols
-app.post("/add/bet/gols", async (req, res) => {
-    try {
-        console.log(req.body);
-        const bet = req.body;
-        const bets = await pool.query(
-            `INSERT INTO NUMERO_GOLS (ID_APOSTA, TIPO, NUMERO)
-            VALUES
-            ($1, $2, $3)
-            `,
-            [bet.id_aposta, bet.tipo, bet.numero]
-        );
-        res.json(bets.rows);
-    } catch (error) {
-        console.error("ERROR: " + error.message);
-    }
-});
-
-// Adicionar aposta ao carrinho
 
 // Rotas AMBOS
 // Fazer login
+app.post("/login",  async (req, res) => {
+    try {
+        console.log(req.body);
+        const userInfo = req.body;
+        const user = await pool.query(
+            "SELECT TIPO, ID_USUARIO FROM USUARIO WHERE EMAIL = ($1) AND SENHA = ($2)",
+            [userInfo.email, userInfo.senha]
+        );
+
+        if (user.rows.length > 0){
+            let houses;
+            if (user.rows[0].tipo == 0){
+                houses = await pool.query(
+                    "SELECT ID_CASA_APOSTA FROM CLIENTES WHERE CLIENTES.ID_USUARIO_APOSTADOR = ($1)",
+                    [user.rows[0].id_usuario]
+                );
+            }
+            else {
+                houses = await pool.query(
+                    "SELECT ID_CASA_APOSTA FROM GERENCIA WHERE GERENCIA.ID_USUARIO_ADMINISTRADOR = ($1)",
+                    [user.rows[0].id_usuario]
+                );
+            }
+            res.json({
+                "tipo": user.rows[0].tipo,
+                "houses": houses.rows
+            });
+        }
+        else {
+            res.json({
+                "erro" : "Not found user with these info"
+            });
+        }
+    } catch (error) {
+        console.error("ERROR: " + error.message);
+    }
+});
 
 // Alterar senha
     

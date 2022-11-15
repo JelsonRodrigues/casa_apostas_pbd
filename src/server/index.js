@@ -533,6 +533,7 @@ app.post("/login",  async (req, res) => {
             }
             res.json({
                 "tipo": user.rows[0].tipo,
+                "id_usuario": user.rows[0].id_usuario,
                 "houses": houses.rows
             });
         }

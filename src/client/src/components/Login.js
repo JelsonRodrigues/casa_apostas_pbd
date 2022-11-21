@@ -23,6 +23,12 @@ const Login = () => {
                 const result = await response.json();
                 if (result.erro === undefined){
                     console.log("SUCESSO AO FAZER LOGIN");
+                    localStorage.clear();
+                    localStorage.setItem("@casa_apostas/user_id", result.id_usuario);
+                    localStorage.setItem("@casa_apostas/user_type", result.tipo);
+                    localStorage.setItem("@casa_apostas/available_houses", JSON.stringify(result.houses));
+
+                    window.location.href = window.location.href + "login";
                 }
                 else {
                     console.log("ERRO AO FAZER LOGIN");
@@ -32,7 +38,6 @@ const Login = () => {
             else {
                 console.log("ERROR CONNECTING TO THE SERVER");
             }
-            //window.location = "/";
         } catch (error) {
             console.log(error);
         }

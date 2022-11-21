@@ -1,17 +1,11 @@
 import './App.css';
 import React,{Fragment} from 'react';
+import AppRoutes from "./AppRoutes";
 
-// Components
-import Login from "./components/Login";
-
-function App() {
+export default function App() {
   return (
     <Fragment>
-      <div className='container'>
-        <Login />
-      </div>
+      <AppRoutes/>
     </Fragment>
   );
 }
-
-export default App;

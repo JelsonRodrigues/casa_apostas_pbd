@@ -521,16 +521,23 @@ app.post("/login",  async (req, res) => {
             let houses;
             if (user.rows[0].tipo == 0){
                 houses = await pool.query(
-                    "SELECT ID_CASA_APOSTA FROM CLIENTES WHERE CLIENTES.ID_USUARIO_APOSTADOR = ($1)",
+                    `SELECT CASA_DE_APOSTA.ID_CASA_APOSTA, CASA_DE_APOSTA.NOME 
+                    FROM CLIENTES 
+                    JOIN CASA_DE_APOSTA ON CLIENTES.ID_CASA_APOSTA = CASA_DE_APOSTA.ID_CASA_APOSTA
+                    WHERE CLIENTES.ID_USUARIO_APOSTADOR = ($1)`,
                     [user.rows[0].id_usuario]
                 );
             }
             else {
                 houses = await pool.query(
-                    "SELECT ID_CASA_APOSTA FROM GERENCIA WHERE GERENCIA.ID_USUARIO_ADMINISTRADOR = ($1)",
+                    `SELECT CASA_DE_APOSTA.ID_CASA_APOSTA, CASA_DE_APOSTA.NOME 
+                    FROM GERENCIA 
+                    JOIN CASA_DE_APOSTA ON GERENCIA.ID_CASA_APOSTA = CASA_DE_APOSTA.ID_CASA_APOSTA
+                    WHERE GERENCIA.ID_USUARIO_ADMINISTRADOR = ($1)`,
                     [user.rows[0].id_usuario]
                 );
             }
+            
             res.json({
                 "tipo": user.rows[0].tipo,
                 "id_usuario": user.rows[0].id_usuario,

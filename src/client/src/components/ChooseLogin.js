@@ -6,11 +6,17 @@ const ChooseLogin = () => {
     const user_type = localStorage.getItem("@casa_apostas/user_type");
 
     console.log("id usuario ", localStorage.getItem("@casa_apostas/user_id"));
+    console.log("nome completo: ", localStorage.getItem("@casa_apostas/user_name"))
     console.log("tipo usuario ", localStorage.getItem("@casa_apostas/user_type"));
     console.log("casas", JSON.parse(localStorage.getItem("@casa_apostas/available_houses")));
     
     const accessHouse = (house_id) => {
         localStorage.setItem("@casa_apostas/logged_house", house_id);
+        for(var i = 0; i < availableHouses.length; i++){
+            if(availableHouses[i].id_casa_aposta == house_id){
+                localStorage.setItem("@casa_apostas/house_name", availableHouses[i].nome);
+            }
+        }
         localStorage.removeItem("@casa_apostas/available_houses");
         if (user_type == 0) {
             window.location.href = window.location.href + "/user";
@@ -23,7 +29,7 @@ const ChooseLogin = () => {
     return (
         <Fragment>
             <h1 className="text-center mt-5">Escolher casa para entrar</h1>
-            <table class="table text-center mt-5">
+            <table className="table text-center mt-5">
                 <thead>
                     <tr>
                         <th>Nome da Casa</th>

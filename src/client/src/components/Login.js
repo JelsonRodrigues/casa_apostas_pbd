@@ -27,11 +27,14 @@ const Login = () => {
                     localStorage.setItem("@casa_apostas/user_id", result.id_usuario);
                     localStorage.setItem("@casa_apostas/user_type", result.tipo);
                     localStorage.setItem("@casa_apostas/available_houses", JSON.stringify(result.houses));
+                    localStorage.setItem("@casa_apostas/user_name", result.nome_completo);
 
                     window.location.href = window.location.href + "login";
                 }
                 else {
                     console.log("ERRO AO FAZER LOGIN");
+                    document.getElementById("emailHelp").textContent = "Credenciais incorretas";
+                    document.getElementById("emailHelp").style.color = "red";
                 }
                 console.log(result);
             }
@@ -47,9 +50,19 @@ const Login = () => {
     <Fragment>
         <h1 className="text-center mt-5">Login</h1>
         <form className="d-flex mt-5" onSubmit={onSubmitLogin}>
-            <input type="text" className="form-control" value={email} onChange={ e => setEmail(e.target.value)}/>
-            <input type="password" className="password-control" value={password} onChange={ e => setPassword(e.target.value)}/>
-            <button className="btn btn-success">Login</button>
+            <div className="form-control">
+                <div className="form-group">
+                    <label>Endereço de email</label>
+                    <input type="text" className="form-control" placeholder="Seu email" value={email} onChange={ e => setEmail(e.target.value)}/>
+                    <small id="emailHelp" className="form-text">Nunca vamos compartilhar seu email, com ninguém.</small>
+                </div>
+                <div className="form-group">
+                    <label>Senha</label>
+                    <br/>
+                    <input type="password" className="password-control" placeholder="Sua senha" value={password} onChange={ e => setPassword(e.target.value)}/>
+                </div>
+                <button type="submit" className="btn btn-success mt-2">Login</button>
+            </div>
         </form>
     </Fragment>
     );

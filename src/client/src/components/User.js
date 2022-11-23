@@ -55,7 +55,7 @@ const User = () => {
             </div>
             <div className="text-center mt-4">
                 <button
-                    className="btn btn-success m-4" 
+                    className="btn btn-success m-4"
                     onClick={() => createTicket()}>
                     Fazer uma aposta
                 </button>

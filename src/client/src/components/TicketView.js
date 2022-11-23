@@ -33,34 +33,34 @@ const TicketView = () => {
     };
 
     const getTotalApostado = () => {
-        let total = 0;
+        let total = 0.0;
 
         if(bets_resultado_final[0] !== undefined){
             if(bets_resultado_final[1] !== undefined){
                 bets_resultado_final.forEach(bet => {
-                    total = total + bet.total_apostado;
+                    total = total + parseFloat(bet.total_apostado);
                 });
             } else{
-                total = total + bets_resultado_final[0].valor_apostado;
+                total = total + parseFloat(bets_resultado_final[0].valor_apostado);
             }
         }
         if(bets_escanteios[0] !== undefined){
             if(bets_escanteios[1] !== undefined){
                 console.log("chrck 1");
                 bets_escanteios.forEach(bet => {
-                    total = total + bet.total_apostado;
+                    total = total + parseFloat(bet.total_apostado);
                 });
             } else{
-                total = total + bets_escanteios[0].valor_apostado;
+                total = total + parseFloat(bets_escanteios[0].valor_apostado);
             }
         }
         if(bets_gols[0] !== undefined){
             if(bets_gols[1] !== undefined){
                 bets_gols.forEach(bet => {
-                    total = total + bet.total_apostado;
+                    total = total + parseFloat(bet.total_apostado);
                 });
             } else{
-                total = total + bets_gols[0].valor_apostado;
+                total = total + parseFloat(bets_gols[0].valor_apostado);
             }
         }
 

@@ -65,11 +65,11 @@ const CreateTicket = () => {
                 if (result.erro !== undefined) {
                     console.log("ERRO AO CARREGAR AS APOSTAS DISPONIVEIS");
                 }
-                window.location.href = window.location.origin + "/login/user";
             }
             else {
                 console.log("ERROR CONNECTING TO THE SERVER");
             }
+            window.location.href = window.location.origin + "/login/user";
         } catch (error) {
             console.error(error);
         }
@@ -211,7 +211,8 @@ const CreateTicket = () => {
             </div>
             <form onSubmit={() => confirmTicket()}>
                 <div className="text-center mt5">
-                    <button type="submit" className="btn btn-success">Confirmar</button>
+                    <button type="submit"
+                    className="btn btn-success btn-lg active">Confirmar</button>
                 </div>
             </form>
         </Fragment>

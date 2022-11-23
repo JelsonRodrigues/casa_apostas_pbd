@@ -22,7 +22,6 @@ ORDER BY clientes.saldo DESC;
 -- Buscar o valor total que Pedro Tavares de Melo possui entre todas as casas que ele tem conta
 SELECT SUM(clientes.saldo)
 FROM clientes
-JOIN casa_de_aposta ON clientes.id_casa_aposta = casa_de_aposta.id_casa_aposta
 JOIN usuario ON clientes.id_usuario_apostador = usuario.id_usuario
 WHERE usuario.nome = 'Pedro' AND usuario.sobrenome = 'Tavares de Melo';
 

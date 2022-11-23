@@ -65,6 +65,7 @@ const CreateTicket = () => {
                 if (result.erro !== undefined) {
                     console.log("ERRO AO CARREGAR AS APOSTAS DISPONIVEIS");
                 }
+                window.location.href = window.location.origin + "/login/user";
             }
             else {
                 console.log("ERROR CONNECTING TO THE SERVER");
@@ -110,6 +111,9 @@ const CreateTicket = () => {
             <div>
                 <h2 className="text-center mt-5">Apostas disponíveis</h2>
             </div>
+            <div className="container mx-auto w-25">
+                <input type="text" size="2" className="form-control" placeholder="Valor" value={valorAposta} onChange={ (e) => setvalorAposta(e.target.value)}/>
+            </div>
             <div>
                 <table className="table text-center mt-4">
                     <thead>
@@ -137,8 +141,8 @@ const CreateTicket = () => {
                                     <td>{bet.aposta_odd}</td>
                                     <td>
                                     <div className="d-flex">
-                                        <input type="text" size="2" className="form-control" placeholder="Valor" value={valorAposta} onChange={ (e) => setvalorAposta(e.target.value)}/>
-                                        <button onClick={(aposta_id) => onSubmit(bet.aposta_id)} className="btn btn-success">Adicionar</button>
+                                        {/* <input type="text" size="2" className="form-control" placeholder="Valor" value={valorAposta} onChange={ (e) => setvalorAposta(e.target.value)}/> */}
+                                        <button onClick={(aposta_id) => onSubmit(bet.aposta_id)} className="btn btn-success mx-auto">Adicionar</button>
                                     </div>
                                     </td>
                                 </tr>
@@ -166,8 +170,8 @@ const CreateTicket = () => {
                                     <td>{bet.aposta_odd}</td>
                                     <td>
                                         <div className="d-flex">
-                                            <input type="text" size="2" className="form-control" placeholder="Valor" value={valorAposta} onChange={ (e) => setvalorAposta(e.target.value)}/>
-                                            <button onClick={(aposta_id) => onSubmit(bet.aposta_id)} className="btn btn-success">Adicionar</button>
+                                            {/* <input type="text" size="2" className="form-control" placeholder="Valor" value={valorAposta} onChange={ (e) => setvalorAposta(e.target.value)}/> */}
+                                            <button onClick={(aposta_id) => onSubmit(bet.aposta_id)} className="btn btn-success mx-auto">Adicionar</button>
                                         </div>
                                     </td>
                                 </tr>
@@ -195,8 +199,8 @@ const CreateTicket = () => {
                                     <td>{bet.aposta_odd}</td>
                                     <td>
                                         <div className="d-flex">
-                                            <input type="text" size="2" className="form-control" placeholder="Valor" value={valorAposta} onChange={ (e) => setvalorAposta(e.target.value)}/>
-                                            <button onClick={(aposta_id) => onSubmit(bet.aposta_id)} className="btn btn-success">Adicionar</button>
+                                            {/* <input type="text" size="2" className="form-control" placeholder="Valor" value={valorAposta} onChange={ (e) => setvalorAposta(e.target.value)}/> */}
+                                            <button onClick={(aposta_id) => onSubmit(bet.aposta_id)} className="btn btn-success mx-auto">Adicionar</button>
                                         </div>
                                     </td>
                                 </tr>

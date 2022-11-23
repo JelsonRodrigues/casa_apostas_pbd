@@ -54,7 +54,12 @@ const User = () => {
                 <b>Saldo:</b> <label id="userMoney">R$ 00.00</label>
             </div>
             <div className="text-center mt-4">
-                <button className="btn btn-danger" onClick={() => {
+                <button
+                    className="btn btn-success m-4" 
+                    onClick={() => createTicket()}>
+                    Fazer uma aposta
+                </button>
+                <button className="btn btn-danger m-4" onClick={() => {
                     localStorage.clear();
                     window.location.href = "/";
                 }}>Sair</button>
@@ -62,13 +67,7 @@ const User = () => {
             <div className="mt-5">
                 <MyTickets />
             </div>
-            <div className="text-center">
-                <button
-                    className="btn btn-success mt-5" 
-                    onClick={() => createTicket()}>
-                    Fazer uma aposta
-                </button>
-            </div>
+
         </Fragment>
     );
 };

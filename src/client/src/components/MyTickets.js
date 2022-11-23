@@ -1,5 +1,4 @@
 import React, { Fragment, useState, useEffect } from "react";
-import TicketView from "./TicketView";
 
 const MyTickets = () => {
 
@@ -16,11 +15,8 @@ const MyTickets = () => {
                 if (result.erro !== undefined) {
                     console.log("ERRO AO CARREGAR OS TICKETS");
                 }
-                result.forEach(element => {
-                    element.data = Date(element.data);
-                });
+
                 setTickets(result);
-                console.log("Estado tickets: ", tickets);
             }
             else {
                 console.log("ERROR CONNECTING TO THE SERVER");

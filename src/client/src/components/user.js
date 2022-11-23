@@ -8,8 +8,6 @@ const User = () => {
     const user_id = localStorage.getItem("@casa_apostas/user_id");
     const house_id = localStorage.getItem("@casa_apostas/logged_house");
 
-    const [saldo, setSaldo] = useState(0);
-
     const getSaldo = async () => {
         try {
             const response = await fetch("http://localhost:5000/money/" + house_id + "/" + user_id);
@@ -18,8 +16,15 @@ const User = () => {
                 if (result.erro !== undefined){
                     console.log("ERRO AO OBTER O SALDO");
                 }
-                setSaldo(result.saldo);
-                console.log("Estado saldo:", saldo);
+                localStorage.setItem("@casa_apostas/user_money", result.saldo);
+
+                if (parseFloat(result.saldo) > 0){
+                    document.getElementById("userMoney").style.color = "green";
+                }
+                else if (parseFloat(result.saldo) < 0) {
+                    document.getElementById("userMoney").style.color = "red";
+                }
+                document.getElementById("userMoney").textContent = "R$ " + result.saldo;
             }
             else {
                 console.log("ERROR CONNECTING TO THE SERVER");
@@ -28,6 +33,10 @@ const User = () => {
             console.error(error);
         }
     };
+
+    const createTicket = () => {
+        window.location.href = window.location.origin + "/new/ticket";
+    }
 
     useEffect(() => {
     getSaldo();
@@ -42,9 +51,7 @@ const User = () => {
                 </label>
             </div>
             <div className="text-center mt-2">
-                <label>
-                    <b>Saldo:</b> {saldo}
-                </label>
+                <b>Saldo:</b> <label id="userMoney">R$ 00.00</label>
             </div>
             <div className="text-center mt-4">
                 <button className="btn btn-danger" onClick={() => {
@@ -54,6 +61,13 @@ const User = () => {
             </div>
             <div className="mt-5">
                 <MyTickets />
+            </div>
+            <div className="text-center">
+                <button
+                    className="btn btn-success mt-5" 
+                    onClick={() => createTicket()}>
+                    Fazer uma aposta
+                </button>
             </div>
         </Fragment>
     );

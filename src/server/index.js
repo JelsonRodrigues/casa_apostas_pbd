@@ -267,11 +267,40 @@ app.get("/get/bet/:house_id", async (req, res) => {
     try {
         console.log(req.params);
         const { house_id } = req.params;
-        const bets = await pool.query(
-            "SELECT * FROM APOSTA WHERE ID_CASA_APOSTA = $1",
+        const bets_resultado_final = await pool.query(
+            `SELECT APOSTA.ID_APOSTA AS APOSTA_ID, APOSTA.ODD AS APOSTA_ODD, RESULTADO_FINAL.RESULTADO_FINAL,
+            JOGO.TIME_CASA, JOGO.TIME_FORA
+            FROM APOSTA
+            JOIN JOGO ON APOSTA.ID_JOGO = JOGO.ID_JOGO
+            JOIN RESULTADO_FINAL ON APOSTA.ID_APOSTA = RESULTADO_FINAL.ID_APOSTA
+            WHERE ID_CASA_APOSTA = $1`,
             [house_id]
         );
-        res.json(bets.rows);
+
+        const bets_escanteios = await pool.query(
+            `SELECT APOSTA.ID_APOSTA AS APOSTA_ID, APOSTA.ODD AS APOSTA_ODD, NUMERO_ESCANTEIOS.TIPO AS ESCANTEIOS_TIPO,
+            NUMERO_ESCANTEIOS.NUMERO AS ESCANTEIOS_NUMERO, JOGO.TIME_CASA, JOGO.TIME_FORA
+            FROM APOSTA
+            JOIN JOGO ON APOSTA.ID_JOGO = JOGO.ID_JOGO
+            JOIN NUMERO_ESCANTEIOS ON APOSTA.ID_APOSTA = NUMERO_ESCANTEIOS.ID_APOSTA
+            WHERE ID_CASA_APOSTA = $1`,
+            [house_id]
+        );
+
+        const bets_gols = await pool.query(
+            `SELECT APOSTA.ID_APOSTA AS APOSTA_ID, APOSTA.ODD AS APOSTA_ODD, NUMERO_GOLS.TIPO AS GOLS_TIPO,
+            NUMERO_GOLS.NUMERO AS GOLS_NUMERO, JOGO.TIME_CASA, JOGO.TIME_FORA
+            FROM APOSTA
+            JOIN JOGO ON APOSTA.ID_JOGO = JOGO.ID_JOGO
+            JOIN NUMERO_GOLS ON APOSTA.ID_APOSTA = NUMERO_GOLS.ID_APOSTA
+            WHERE ID_CASA_APOSTA = $1`,
+            [house_id]
+        );
+        res.json({
+            "bets_resultado_final" : bets_resultado_final.rows,
+            "bets_escanteios" : bets_escanteios.rows,
+            "bets_gols" : bets_gols.rows
+        });
     } catch (error) {
         console.error("ERROR: " + error.message);
     }
@@ -309,24 +338,47 @@ app.get("/get/ticket/:bilhete_id", async (req, res) => {
             [params.bilhete_id]
         );
 
-        const bets = await pool.query(
+        const bets_resultado_final = await pool.query(
+            `SELECT APOSTA.ID_APOSTA AS APOSTA_ID, BILHETE_TEM_APOSTA.ODD AS APOSTA_ODD, BILHETE_TEM_APOSTA.VALOR_APOSTADO,
+            BILHETE_TEM_APOSTA.STATUS AS APOSTA_STATUS, BILHETE_TEM_APOSTA.RESULTADO AS APOSTA_RESULTADO,
+            RESULTADO_FINAL.RESULTADO_FINAL, JOGO.TIME_CASA, JOGO.TIME_FORA 
+            FROM APOSTA
+            JOIN JOGO ON APOSTA.ID_JOGO = JOGO.ID_JOGO
+            JOIN BILHETE_TEM_APOSTA ON BILHETE_TEM_APOSTA.ID_APOSTA = APOSTA.ID_APOSTA
+            JOIN RESULTADO_FINAL ON APOSTA.ID_APOSTA = RESULTADO_FINAL.ID_APOSTA
+            WHERE BILHETE_TEM_APOSTA.ID_BILHETE = $1 AND APOSTA.TIPO = 0`,
+            [params.bilhete_id]
+        );
+
+        const bets_escanteios = await pool.query(
             `SELECT APOSTA.ID_APOSTA AS APOSTA_ID, BILHETE_TEM_APOSTA.ODD AS APOSTA_ODD, BILHETE_TEM_APOSTA.VALOR_APOSTADO,
             BILHETE_TEM_APOSTA.STATUS AS APOSTA_STATUS, BILHETE_TEM_APOSTA.RESULTADO AS APOSTA_RESULTADO, APOSTA.TIPO AS APOSTA_TIPO,
-            RESULTADO_FINAL.RESULTADO_FINAL, NUMERO_ESCANTEIOS.TIPO AS ESCANTEIOS_TIPO, NUMERO_ESCANTEIOS.NUMERO AS ESCANTEIOS_NUMERO,
+            NUMERO_ESCANTEIOS.TIPO AS ESCANTEIOS_TIPO, NUMERO_ESCANTEIOS.NUMERO AS ESCANTEIOS_NUMERO, JOGO.TIME_CASA, JOGO.TIME_FORA 
+            FROM APOSTA
+            JOIN JOGO ON APOSTA.ID_JOGO = JOGO.ID_JOGO
+            JOIN BILHETE_TEM_APOSTA ON BILHETE_TEM_APOSTA.ID_APOSTA = APOSTA.ID_APOSTA
+            JOIN NUMERO_ESCANTEIOS ON APOSTA.ID_APOSTA = NUMERO_ESCANTEIOS.ID_APOSTA
+            WHERE BILHETE_TEM_APOSTA.ID_BILHETE = $1 AND APOSTA.TIPO = 1`,
+            [params.bilhete_id]
+        );
+
+        const bets_gols = await pool.query(
+            `SELECT APOSTA.ID_APOSTA AS APOSTA_ID, BILHETE_TEM_APOSTA.ODD AS APOSTA_ODD, BILHETE_TEM_APOSTA.VALOR_APOSTADO,
+            BILHETE_TEM_APOSTA.STATUS AS APOSTA_STATUS, BILHETE_TEM_APOSTA.RESULTADO AS APOSTA_RESULTADO, APOSTA.TIPO AS APOSTA_TIPO,
             NUMERO_GOLS.TIPO AS GOLS_TIPO, NUMERO_GOLS.NUMERO AS GOLS_NUMERO, JOGO.TIME_CASA, JOGO.TIME_FORA 
             FROM APOSTA
             JOIN JOGO ON APOSTA.ID_JOGO = JOGO.ID_JOGO
             JOIN BILHETE_TEM_APOSTA ON BILHETE_TEM_APOSTA.ID_APOSTA = APOSTA.ID_APOSTA
-            LEFT JOIN RESULTADO_FINAL ON APOSTA.ID_APOSTA = RESULTADO_FINAL.ID_APOSTA
-            LEFT JOIN NUMERO_ESCANTEIOS ON APOSTA.ID_APOSTA = NUMERO_ESCANTEIOS.ID_APOSTA
-            LEFT JOIN NUMERO_GOLS ON APOSTA.ID_APOSTA = NUMERO_GOLS.ID_APOSTA
-            WHERE BILHETE_TEM_APOSTA.ID_BILHETE = $1`,
+            JOIN NUMERO_GOLS ON APOSTA.ID_APOSTA = NUMERO_GOLS.ID_APOSTA
+            WHERE BILHETE_TEM_APOSTA.ID_BILHETE = $1 AND APOSTA.TIPO = 2`,
             [params.bilhete_id]
         );
 
         res.json({
             "ticket_info": ticket_info.rows[0],
-            "bets" : bets.rows
+            "bets_resultado_final" : bets_resultado_final.rows,
+            "bets_escanteios" : bets_escanteios.rows,
+            "bets_gols" : bets_gols.rows
         });
     } catch (error) {
         console.error("ERROR: " + error.message);

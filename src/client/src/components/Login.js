@@ -28,7 +28,7 @@ const Login = () => {
                     localStorage.setItem("@casa_apostas/user_type", result.tipo);
                     localStorage.setItem("@casa_apostas/available_houses", JSON.stringify(result.houses));
                     localStorage.setItem("@casa_apostas/user_name", result.nome_completo);
-
+                    
                     window.location.href = window.location.href + "login";
                 }
                 else {
@@ -48,22 +48,27 @@ const Login = () => {
 
     return (
     <Fragment>
-        <h1 className="text-center mt-5">Login</h1>
-        <form className="d-flex mt-5" onSubmit={onSubmitLogin}>
-            <div className="form-control">
-                <div className="form-group">
-                    <label>Endereço de email</label>
-                    <input type="text" className="form-control" placeholder="Seu email" value={email} onChange={ e => setEmail(e.target.value)}/>
-                    <small id="emailHelp" className="form-text">Nunca vamos compartilhar seu email, com ninguém.</small>
+        <div className='container'>
+            <h1 className="text-center mt-5">Apostas PBD</h1>
+        </div>
+        <h2 className="text-center mt-5">Login</h2>
+        <div className="container">
+            <form className="d-flex mt-5" onSubmit={onSubmitLogin}>
+                <div className="form-control">
+                    <div className="form-group">
+                        <label>Endereço de email</label>
+                        <input type="text" className="form-control" placeholder="Seu email" value={email} onChange={ e => setEmail(e.target.value)}/>
+                        <small id="emailHelp" className="form-text">Nunca vamos compartilhar seu email, com ninguém.</small>
+                    </div>
+                    <div className="form-group">
+                        <label>Senha</label>
+                        <br/>
+                        <input type="password" className="password-control" placeholder="Sua senha" value={password} onChange={ e => setPassword(e.target.value)}/>
+                    </div>
+                    <button type="submit" className="btn btn-success mt-2">Login</button>
                 </div>
-                <div className="form-group">
-                    <label>Senha</label>
-                    <br/>
-                    <input type="password" className="password-control" placeholder="Sua senha" value={password} onChange={ e => setPassword(e.target.value)}/>
-                </div>
-                <button type="submit" className="btn btn-success mt-2">Login</button>
-            </div>
-        </form>
+            </form>
+        </div>
     </Fragment>
     );
 };

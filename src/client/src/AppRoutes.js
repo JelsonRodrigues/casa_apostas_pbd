@@ -6,6 +6,7 @@ import ChooseLogin from "./components/ChooseLogin";
 import User from "./components/User";
 import Admin from "./components/Admin";
 import TicketView from "./components/TicketView";
+import CreateTicket from "./components/CreateTicket";
 
 const AppRoutes = () => {
    return(
@@ -16,6 +17,7 @@ const AppRoutes = () => {
                 <Route component = { Admin } path="/login/admin" element={<Admin />} />
                 <Route component = { User } path="/login/user" element={<User />} />
                 <Route component = { TicketView } path="/view/ticket" element={<TicketView />} />
+                <Route component = { CreateTicket } path="/new/ticket" element={<CreateTicket />} />
             </Routes>
        </BrowserRouter>
    );

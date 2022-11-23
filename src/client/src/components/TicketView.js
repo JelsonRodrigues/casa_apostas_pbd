@@ -5,7 +5,10 @@ const TicketView = () => {
     const ticket_id = localStorage.getItem("@casa_apostas/viewTicket_id");
 
     const [ticket_info, setTicket_info] = useState();
-    const [bets, setBets] = useState([]);
+    const [bets_resultado_final, setBets_resultado_final] = useState([]);
+    const [bets_escanteios, setBets_escanteios] = useState([]);
+    const [bets_gols, setBets_gols] = useState([]);
+    const [total_apostado, setTotal_apostado] = useState(0);
 
     const getTicket = async () => {
         try {
@@ -17,8 +20,9 @@ const TicketView = () => {
                 }
 
                 setTicket_info(result.ticket_info);
-
-                setBets(result.bets);
+                setBets_resultado_final(result.bets_resultado_final);
+                setBets_escanteios(result.bets_escanteios);
+                setBets_gols(result.bets_gols);
             }
             else {
                 console.log("ERROR CONNECTING TO THE SERVER");
@@ -28,9 +32,49 @@ const TicketView = () => {
         }
     };
 
+    const getTotalApostado = () => {
+        let total = 0;
+
+        if(bets_resultado_final[0] !== undefined){
+            if(bets_resultado_final[1] !== undefined){
+                bets_resultado_final.forEach(bet => {
+                    total = total + bet.total_apostado;
+                });
+            } else{
+                total = total + bets_resultado_final[0].valor_apostado;
+            }
+        }
+        if(bets_escanteios[0] !== undefined){
+            if(bets_escanteios[1] !== undefined){
+                console.log("chrck 1");
+                bets_escanteios.forEach(bet => {
+                    total = total + bet.total_apostado;
+                });
+            } else{
+                total = total + bets_escanteios[0].valor_apostado;
+            }
+        }
+        if(bets_gols[0] !== undefined){
+            if(bets_gols[1] !== undefined){
+                bets_gols.forEach(bet => {
+                    total = total + bet.total_apostado;
+                });
+            } else{
+                total = total + bets_gols[0].valor_apostado;
+            }
+        }
+
+        console.log("total:", total);
+        return total;
+    }
+
     useEffect(() => {
         getTicket();
     }, []);
+
+    useEffect(() => {
+        setTotal_apostado(parseFloat(getTotalApostado()));
+    });
 
     return (
         <Fragment>
@@ -47,7 +91,15 @@ const TicketView = () => {
                         {ticket_info.bilhete_status === 1 && (<label>Concluído</label>)}
                         {ticket_info.bilhete_status === 2 && (<label>Cancelado</label>)}
                     </p>
+                        <p> <b>Valor total apostado: </b> 
+                            R$ {total_apostado} 
+                        </p>
                 </label>)}
+            </div>
+            <div className="text-center mt5">
+                <button className="btn btn-warning" onClick={() => {window.history.go(-1);}}>
+                    Voltar
+                </button>
             </div>
             <div>
             <table className="table text-center mt-4">
@@ -66,65 +118,127 @@ const TicketView = () => {
                             <th>Resultado</th>
                         </tr>
                     </thead>
-                    {/* {bets != null && (
+                    {bets_resultado_final != null && (
                         <tbody>
-                            {bets.map(bet => (
-                                <tr key={bets.aposta_id}>
-                                    <td>{bets.aposta_id}</td>
-                                    <td>{bets.time_casa}</td>
-                                    <td>{bets.time_fora}</td>
-                                    <td>{bets.aposta_tipo}</td>
-                                    {bets.aposta_tipo === 0 && (
-                                        <td>Resultado Final</td>
+                            {bets_resultado_final.map(bet => (
+                                <tr key={bet.aposta_id}>
+                                    <td>{bet.aposta_id}</td>
+                                    <td>{bet.time_casa}</td>
+                                    <td>{bet.time_fora}</td>
+                                    <td>Resultado Final</td>
+                                    <td>-</td>
+                                    <td>{bet.resultado_final}</td>
+                                    <td>R$ {parseFloat(bet.valor_apostado)}</td>
+                                    <td>{bet.aposta_odd}</td>
+                                    <td>R$ {parseFloat(bet.aposta_odd * bet.valor_apostado)}</td>
+                                    {bet.aposta_status === 0 && (
+                                        <td>Pendente</td>
                                     )}
-                                    {bets.aposta_tipo === 1 && (
-                                        <td>Número de Escanteios</td>
+                                    {bet.aposta_status === 1 && (
+                                        <td>Concluída</td>
                                     )}
-                                    {bets.aposta_tipo === 2 && (
-                                        <td>Número de Gols</td>
+                                    {bet.aposta_status === 2 && (
+                                        <td>Cancelada</td>
                                     )}
-                                    {bets.aposta_tipo === 0 && (
-                                        <td>-</td>
+                                    {bet.aposta_resultado === null && (
+                                        <td>Pendente</td>
                                     )}
-                                    {bets.aposta_tipo === 1 && (
-                                        {bets.escanteios_tipo === 0 && (
-                                            <td>Nmr. Exato</td>
-                                        )}
-                                        {bets.escanteios_tipo === 1 && (
-                                            <td>Mais que</td>
-                                        )}
-                                        {bets.escanteios_tipo === 2 && (
-                                            <td>Menos que</td>
-                                        )}
+                                    {bet.aposta_resultado === 0 && (
+                                        <td>Perdida</td>
                                     )}
-                                    {bets.aposta_tipo === 2 && (
-                                        {bets.gols_tipo === 0 && (
-                                            <td>Nmr. Exato</td>
-                                        )}
-                                        {bets.gols_tipo === 1 && (
-                                            <td>Mais que</td>
-                                        )}
-                                        {bets.gols_tipo === 2 && (
-                                            <td>Menos que</td>
-                                        )}
+                                    {bet.aposta_resultado === 1 && (
+                                        <td>Ganha</td>
                                     )}
-                                    {bets.aposta_tipo === 0 && (
-                                        <td>{bets.resultado_final}</td>
-                                    )}
-                                    {bets.aposta_tipo === 1 && (
-                                        <td>{bets.escanteios_numero}</td>
-                                    )}
-                                    {bets.aposta_tipo === 2 && (
-                                        <td>{bets.gols_numero}</td>
-                                    )}
-                                    <td>{bets.odd}</td>
-                                    <td>calcular</td>
-                                    <td>{bets.aposta_status}</td>
-                                    <td>{bets.aposta_resultado}</td>
                                 </tr>
                             ))}
                         </tbody>
-                    )} */}
+                    )}
+                    {bets_escanteios != null && (
+                        <tbody>
+                            {bets_escanteios.map(bet => (
+                                <tr key={bet.aposta_id}>
+                                    <td>{bet.aposta_id}</td>
+                                    <td>{bet.time_casa}</td>
+                                    <td>{bet.time_fora}</td>
+                                    <td>Escanteios</td>
+                                    {bet.escanteios_tipo === 0 && (
+                                        <td>Número Exato</td>
+                                    )}
+                                    {bet.escanteios_tipo === 1 && (
+                                        <td>Mais que</td>
+                                    )}
+                                    {bet.escanteios_tipo === 2 && (
+                                        <td>Menos que</td>
+                                    )}
+                                    <td>{bet.escanteios_numero}</td>
+                                    <td>R$ {parseFloat(bet.valor_apostado)}</td>
+                                    <td>{bet.aposta_odd}</td>
+                                    <td>R$ {parseFloat(bet.aposta_odd * bet.valor_apostado)}</td>
+                                    {bet.aposta_status === 0 && (
+                                        <td>Pendente</td>
+                                    )}
+                                    {bet.aposta_status === 1 && (
+                                        <td>Concluída</td>
+                                    )}
+                                    {bet.aposta_status === 2 && (
+                                        <td>Cancelada</td>
+                                    )}
+                                    {bet.aposta_resultado === null && (
+                                        <td>Pendente</td>
+                                    )}
+                                    {bet.aposta_resultado === 0 && (
+                                        <td>Perdida</td>
+                                    )}
+                                    {bet.aposta_resultado === 1 && (
+                                        <td>Ganha</td>
+                                    )}
+                                </tr>
+                            ))}
+                        </tbody>
+                    )}
+                    {bets_gols != null && (
+                        <tbody>
+                            {bets_gols.map(bet => (
+                                <tr key={bet.aposta_id}>
+                                    <td>{bet.aposta_id}</td>
+                                    <td>{bet.time_casa}</td>
+                                    <td>{bet.time_fora}</td>
+                                    <td>Gols</td>
+                                    {bet.gols_tipo === 0 && (
+                                        <td>Número Exato</td>
+                                    )}
+                                    {bet.gols_tipo === 1 && (
+                                        <td>Mais que</td>
+                                    )}
+                                    {bet.gols_tipo === 2 && (
+                                        <td>Menos que</td>
+                                    )}
+                                    <td>{bet.gols_numero}</td>
+                                    <td>R$ {parseFloat(bet.valor_apostado)}</td>
+                                    <td>{bet.aposta_odd}</td>
+                                    <td>R$ {parseFloat(bet.aposta_odd * bet.valor_apostado)}</td>
+                                    {bet.aposta_status === 0 && (
+                                        <td>Pendente</td>
+                                    )}
+                                    {bet.aposta_status === 1 && (
+                                        <td>Concluída</td>
+                                    )}
+                                    {bet.aposta_status === 2 && (
+                                        <td>Cancelada</td>
+                                    )}
+                                    {bet.aposta_resultado === null && (
+                                        <td>Pendente</td>
+                                    )}
+                                    {bet.aposta_resultado === 0 && (
+                                        <td>Perdida</td>
+                                    )}
+                                    {bet.aposta_resultado === 1 && (
+                                        <td>Ganha</td>
+                                    )}
+                                </tr>
+                            ))}
+                        </tbody>
+                    )}
                 </table>
             </div>
         </Fragment>

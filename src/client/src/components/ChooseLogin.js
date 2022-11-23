@@ -10,14 +10,11 @@ const ChooseLogin = () => {
     console.log("tipo usuario ", localStorage.getItem("@casa_apostas/user_type"));
     console.log("casas", JSON.parse(localStorage.getItem("@casa_apostas/available_houses")));
     
-    const accessHouse = (house_id) => {
+    const accessHouse = (house_id, house_name) => {
         localStorage.setItem("@casa_apostas/logged_house", house_id);
-        for(var i = 0; i < availableHouses.length; i++){
-            if(availableHouses[i].id_casa_aposta == house_id){
-                localStorage.setItem("@casa_apostas/house_name", availableHouses[i].nome);
-            }
-        }
+        localStorage.setItem("@casa_apostas/house_name", house_name);
         localStorage.removeItem("@casa_apostas/available_houses");
+
         if (user_type == 0) {
             window.location.href = window.location.href + "/user";
         }
@@ -43,7 +40,7 @@ const ChooseLogin = () => {
                             <td>
                                 <button 
                                     className="btn btn-success" 
-                                    onClick={() => accessHouse(house.id_casa_aposta)}>
+                                    onClick={() => accessHouse(house.id_casa_aposta, house.nome)}>
                                     Acessar
                                 </button>
                             </td>
